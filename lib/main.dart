@@ -24,7 +24,6 @@ class MyApp extends StatelessWidget {
         future: GetAuthCode(),
         builder: (context, authCode) {
           if (authCode.connectionState == ConnectionState.done) {
-            debugger(message: "authCode");
             if (null != authCode.data) {
               return MainScreen("${authCode.data}");
             } else {

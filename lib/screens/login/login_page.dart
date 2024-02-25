@@ -32,41 +32,44 @@ class _LoginPageState extends State<LoginScreen> {
           labelText: '景点编号',
           hintText: '请输入景点编号'),
     );
-    var container = Container(
-      constraints: const BoxConstraints(
-          minWidth: 500.0, minHeight: 500.0, maxWidth: 600.0, maxHeight: 600.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            "限流服务",
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-                left: 100.0, right: 100.0, top: 32.0, bottom: 64.0),
-            child: textFormField,
-          ),
-          ElevatedButton(
-              onPressed: () async {
-                await SaveAuthCode(authCode);
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => MainScreen(authCode)),
-                  (route) => route == null,
-                );
-              },
-              child: const Text("进入"))
-        ],
+    var card = Card(
+      elevation: 5,
+      child: Container(
+        constraints: const BoxConstraints(
+            minWidth: 500.0,
+            minHeight: 500.0,
+            maxWidth: 600.0,
+            maxHeight: 600.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "限流服务",
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 100.0, right: 100.0, top: 32.0, bottom: 64.0),
+              child: textFormField,
+            ),
+            ElevatedButton(
+                onPressed: () async {
+                  await SaveAuthCode(authCode);
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => MainScreen(authCode)),
+                    (route) => route == null,
+                  );
+                },
+                child: const Text("进入"))
+          ],
+        ),
       ),
     );
-    var center = Center(
-        child: Card(
-      elevation: 5,
-      child: container,
-    ));
     return Scaffold(
-      body: center,
+      body: Center(
+        child: card),
     );
   }
 }
