@@ -1,11 +1,12 @@
-import 'dart:html';
-
-import 'package:flutter/cupertino.dart';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:ledshow_web/models/LedParameters.dart';
+import 'package:ledshow_web/provider/WebSocketProvider.dart';
+import 'package:provider/provider.dart';
 
 class MainScreen extends StatefulWidget {
   final String authCode;
+  WebSocketProvider? webSocketProvider;
 
   MainScreen(this.authCode);
 
@@ -17,14 +18,44 @@ class _DashboardScreen extends State<MainScreen> {
   var leds = List.empty(growable: true);
 
   @override
-  void dispose() {
-    super.dispose();
-    leds.add(LedParameters());
+  void initState() {
+    super.initState();
     leds.add(LedParameters());
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.webSocketProvider = Provider.of<WebSocketProvider>(context);
+    widget.webSocketProvider?.subscribe("home", (id, event, data) {
+      log("message id=$id , event=$event, data=$data");
+      if (event == "LED") {
+        for (var led in leds) {
+          if (led.ip == id) {
+            led.status = data;
+            setState(() {
+              log("刷新");
+            });
+          }
+        }
+      }
+    });
+  }
+
+  Function wsCall() {
+    return (id, event, data) {};
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    log("build");
+    // ApiManager.getStream("request");
+
     List<Widget> widgets() {
       List<Widget> widgets = List.empty(growable: true);
       var infoCard = Card(
@@ -133,30 +164,5 @@ class _DashboardScreen extends State<MainScreen> {
         ),
       ),
     ));
-  }
-}
-
-class TwoColumnList extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return GridView.builder(
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, // 指定列数为2
-        crossAxisSpacing: 10.0, // 列之间的水平间距
-        mainAxisSpacing: 10.0, // 行之间的垂直间距
-      ),
-      itemCount: 20, // 假设有20个项目
-      itemBuilder: (context, index) {
-        return Card(
-          child: ListTile(
-            title: Text('Item $index'),
-            subtitle: Text('Description of Item $index'),
-            onTap: () {
-              // 处理项目点击事件
-            },
-          ),
-        );
-      },
-    );
   }
 }
