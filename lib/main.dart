@@ -1,5 +1,3 @@
-import 'dart:js';
-
 import 'package:flutter/material.dart';
 import 'package:ledshow_web/localstorage/storage.dart';
 import 'package:ledshow_web/provider/ThemeProvider.dart';
@@ -31,11 +29,13 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: FutureBuilder<String?>(
-        future: GetAuthCode(),
-        builder: (context, authCode) {
-          if (authCode.connectionState == ConnectionState.done) {
-            if (null != authCode.data) {
-              return MainScreen("${authCode.data}");
+        future: GetAuth(),
+        builder: (context, auth) {
+          if (auth.connectionState == ConnectionState.done) {
+            var data = auth.data;
+            if (null != data) {
+              var split = data.split("|");
+              return MainScreen(split[0], split[1], split[2]);
             } else {
               return LoginScreen();
             }

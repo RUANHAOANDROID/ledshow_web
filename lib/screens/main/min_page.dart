@@ -6,9 +6,11 @@ import 'package:provider/provider.dart';
 
 class MainScreen extends StatefulWidget {
   final String authCode;
+  final String name;
+  final String limitsCount;
   WebSocketProvider? webSocketProvider;
 
-  MainScreen(this.authCode);
+  MainScreen(this.authCode, this.name, this.limitsCount);
 
   @override
   State<StatefulWidget> createState() => _DashboardScreen();
@@ -68,7 +70,7 @@ class _DashboardScreen extends State<MainScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
-                  "限流：${"500"}",
+                  "限流：${widget.limitsCount}",
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Text(
@@ -85,7 +87,7 @@ class _DashboardScreen extends State<MainScreen> {
         ),
       );
       widgets.add(Text(
-        "神龙顶风景区(${widget.authCode})",
+        "${widget.name}(${widget.authCode})",
         style: Theme.of(context).textTheme.titleLarge,
       ));
       widgets.add(const SizedBox(height: 8));

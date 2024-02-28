@@ -13,8 +13,8 @@ class HttpUtils {
       //通过传递一个 `BaseOptions`来创建dio实例
       var options = BaseOptions(
           baseUrl: BASE_URL,
-          connectTimeout: CONNECT_TIMEOUT.inSeconds,
-          receiveTimeout: RECEIVE_TIMEOUT.inSeconds,
+          connectTimeout: CONNECT_TIMEOUT,
+          receiveTimeout: RECEIVE_TIMEOUT,
           headers: {
             'Content-Type':'application/json',
             "Access-Control-Allow-Origin": "*",

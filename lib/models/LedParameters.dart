@@ -1,16 +1,16 @@
 class LedParameters {
-  String title;
-  String ip;
-  int port;
-  int x;
-  int y;
-  int width;
-  int height;
-  int fontSize;
-  String status;
+  String name = "LED";
+  String ip = "192.168.8.1";
+  int port = 5005;
+  int x = 0;
+  int y = 0;
+  int width = 32;
+  int height = 16;
+  int fontSize = 10;
+  String status = "status";
 
   LedParameters({
-    this.title = "LED",
+    this.name = "LED",
     this.ip = "192.168.8.199",
     this.port = 5005,
     this.x = 0,
