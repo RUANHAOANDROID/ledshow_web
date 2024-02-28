@@ -7,5 +7,5 @@ class Resp<T> {
 
 }
 
-final SUCCESS = 0;
-final FAIL = 1;
+final SUCCESS = 1;
+final FAIL = 0;

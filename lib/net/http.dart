@@ -35,7 +35,7 @@ class HttpUtils {
     data = data ?? {};
     method = method ?? "get";
     // 打印请求相关信息：请求地址、请求方式、请求参数
-    log("------Dio Request-----\n$method\t$BASE_URL\t$path\n"
+    log("------Dio Request-----\n$method\t$BASE_URL$path\n"
         "${jsonEncode(data)}");
 
     var dio = getInstance();

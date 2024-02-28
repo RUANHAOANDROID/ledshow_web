@@ -1,7 +1,12 @@
 import 'dart:developer';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ledshow_web/models/LedParameters.dart';
+import 'package:ledshow_web/models/Resp.dart';
+import 'package:ledshow_web/net/http.dart';
 import 'package:ledshow_web/provider/WebSocketProvider.dart';
+import 'package:ledshow_web/widget/mytoast.dart';
 import 'package:provider/provider.dart';
 
 class MainScreen extends StatefulWidget {
@@ -17,12 +22,54 @@ class MainScreen extends StatefulWidget {
 }
 
 class _DashboardScreen extends State<MainScreen> {
-  var leds = List.empty(growable: true);
+  List<LedParameters> leds = List.empty(growable: true);
+
+  void getLedList() async {
+    try {
+      var resp = await HttpUtils.get("/leds/${widget.authCode}", "");
+      int code = resp["code"];
+      if (code == SUCCESS) {
+        leds.clear();
+        setState(() {
+          List<dynamic> items = resp['data'];
+          for (var item in items) {
+            var parameters = LedParameters();
+            parameters.name = item["name"];
+            parameters.height = item["h"];
+            parameters.width = item["w"];
+            parameters.x = item["x"];
+            parameters.y = item["y"];
+            parameters.fontSize = item["fontSize"];
+            parameters.ip = item["ip"];
+            parameters.port = item["port"];
+            leds.add(parameters);
+          }
+        });
+      }
+    } catch (e) {
+      log("$e");
+      FToast()
+          .init(context)
+          .showToast(child: MyToast(tip: "获取LED失败$e", ok: false));
+    }
+  }
+
+  void reconnect(String ip) async {
+    try {
+      var resp = await HttpUtils.get("/recon/$ip", "");
+      int code = resp["code"];
+      if (code == SUCCESS) {
+        setState(() {});
+      }
+    } catch (e) {
+      log("$e");
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    leds.add(LedParameters());
+    getLedList();
   }
 
   @override
@@ -34,9 +81,9 @@ class _DashboardScreen extends State<MainScreen> {
       if (event == "LED") {
         for (var led in leds) {
           if (led.ip == id) {
-            led.status = data;
             setState(() {
               log("刷新");
+              led.status = data;
             });
           }
         }
@@ -50,6 +97,7 @@ class _DashboardScreen extends State<MainScreen> {
 
   @override
   void dispose() {
+    widget.webSocketProvider?.unsubscribe("home");
     super.dispose();
   }
 
@@ -97,62 +145,70 @@ class _DashboardScreen extends State<MainScreen> {
         "LED",
         style: Theme.of(context).textTheme.titleLarge,
       ));
-      var ledCard = Card(
-        elevation: 10,
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Container(
-            constraints: BoxConstraints(minWidth: double.infinity),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "点位：${"东桥LED"}",
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                Row(
+      Column createLedCard() {
+        return Column();
+      }
+
+      if (leds.isNotEmpty) {
+        for (var led in leds) {
+          widgets.add(Card(
+            elevation: 10,
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Container(
+                constraints: BoxConstraints(minWidth: double.infinity),
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "IP：${"192.168.9.199"}",
+                      "点位：${led.name}",
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    TextButton.icon(
-                        onPressed: () {},
-                        icon: Icon(
-                          Icons.refresh,
-                          color: Colors.blue,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "IP：${led.ip}",
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        label: Text(
-                          "重连",
-                          style: TextStyle(color: Colors.blue),
-                        )),
+                        TextButton.icon(
+                            onPressed: () {
+                              reconnect(led.ip);
+                            },
+                            icon: Icon(
+                              Icons.refresh,
+                              color: Colors.blue,
+                            ),
+                            label: Text(
+                              "重连",
+                              style: TextStyle(color: Colors.blue),
+                            )),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "状态：",
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        Text(
+                          "${led.status}",
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.apply(color: Colors.green),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "状态：",
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    Text(
-                      "${"ACK-正确"}",
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.apply(color: Colors.green),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-      );
-      widgets.add(ledCard);
-      widgets.add(const SizedBox(height: 8));
-      widgets.add(ledCard);
+          ));
+          widgets.add(const SizedBox(height: 8));
+        }
+      }
       return widgets; // all widget added now retrun the list here
     }
 

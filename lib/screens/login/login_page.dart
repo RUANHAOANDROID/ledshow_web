@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -18,7 +17,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginPageState extends State<LoginScreen> {
   String authCode = "";
   String name = "";
-  String limit = "";
+  int limit = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -63,15 +62,15 @@ class _LoginPageState extends State<LoginScreen> {
             ElevatedButton(
                 onPressed: () async {
                   if (authCode == "") {
-                    FToast()
-                        .init(context)
-                        .showToast(child: const MyToast(tip: "编号为空", ok: false));
+                    FToast().init(context).showToast(
+                        child: const MyToast(tip: "编号为空", ok: false));
                     return;
                   }
                   var isHanzi = RegExp(r'[\u4e00-\u9fa5]').hasMatch(authCode);
                   if (isHanzi) {
                     FToast().init(context).showToast(
-                        child: const MyToast(tip: "输入错误 编号由a~y,0~9组成", ok: false));
+                        child:
+                            const MyToast(tip: "输入错误 编号由a~y,0~9组成", ok: false));
                     return;
                   }
                   var ok = await auth(authCode);
@@ -99,9 +98,9 @@ class _LoginPageState extends State<LoginScreen> {
     try {
       log("auth----");
       var resp = await HttpUtils.get("/auth/$authCode", "");
-      var code = resp["code"];
-      log("resp----${resp}");
-      if (code == SUCCESS) {
+      log(resp.toString());
+      int code = resp["code"] as int;
+      if (code != null && code == SUCCESS) {
         name = resp["data"]["name"];
         limit = resp["data"]["limitsCount"];
         await SaveAuth("$authCode|${name}|${limit}");
