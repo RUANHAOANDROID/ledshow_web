@@ -73,7 +73,7 @@ class _LoginPageState extends State<LoginScreen> {
                             const MyToast(tip: "输入错误 编号由a~y,0~9组成", ok: false));
                     return;
                   }
-                  var ok = await auth(authCode);
+                  var ok = await auth();
                   if (ok) {
                     Navigator.pushAndRemoveUntil(
                       context,
@@ -94,9 +94,8 @@ class _LoginPageState extends State<LoginScreen> {
     );
   }
 
-  Future<bool> auth(code) async {
+  Future<bool> auth() async {
     try {
-      log("auth----");
       var resp = await HttpUtils.get("/auth/$authCode", "");
       log(resp.toString());
       int code = resp["code"] as int;
@@ -112,7 +111,7 @@ class _LoginPageState extends State<LoginScreen> {
         return false;
       }
     } catch (e) {
-      log("error----${e}");
+      log("error----$e");
       FToast().init(context).showToast(child: MyToast(tip: "${e}", ok: false));
       return false;
     }

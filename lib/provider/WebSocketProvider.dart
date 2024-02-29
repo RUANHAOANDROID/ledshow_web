@@ -23,7 +23,7 @@ class WebSocketProvider extends ChangeNotifier {
       (message) {
         // 处理收到的WebSocket消息
         isConnected = true;
-        log('Received: $message');
+        //log('Received: $message');
         //debugger(message: message);
         var jsonMap = json.decode(message);
         var id = jsonMap['id'];

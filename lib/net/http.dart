@@ -1,26 +1,28 @@
-
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:ledshow_web/config.dart';
 import '../constants.dart';
-import 'dart:developer';
+
 class HttpUtils {
   static Dio? dio;
+  static var url;
 
   /// 生成Dio实例
   static Dio getInstance() {
     if (dio == null) {
       //通过传递一个 `BaseOptions`来创建dio实例
       var options = BaseOptions(
-          baseUrl: BASE_URL,
+          baseUrl: url,
           connectTimeout: CONNECT_TIMEOUT,
           receiveTimeout: RECEIVE_TIMEOUT,
           headers: {
-            'Content-Type':'application/json',
+            'Content-Type': 'application/json',
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Headers": "*",
             "Access-Control-Expose-Headers":
-            "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Cache-Control, Content-Language, Content-Type",
+                "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Cache-Control, Content-Language, Content-Type",
             "Access-Control-Allow-Methods": "*",
             "Access-Control-Allow-Credentials": "true",
           });
@@ -31,35 +33,37 @@ class HttpUtils {
 
   /// 请求api
   static Future<Map<String, dynamic>> request(String path,
-      {data, method}) async {
-    data = data ?? {};
+      {requestBody, method}) async {
+    requestBody = requestBody ?? {};
     method = method ?? "get";
-    // 打印请求相关信息：请求地址、请求方式、请求参数
-    log("------Dio Request-----\n$method\t$BASE_URL$path\n"
-        "${jsonEncode(data)}");
-
+    if (url == null) {
+      var config = await loadConfig();
+      url = config['address'];
+      log(url);
+    }
     var dio = getInstance();
     var resp;
     if (method == "get") {
+      log(url+path);
       // get
       var response = await dio.get(path);
+      log("response code =${response.statusCode}");
       resp = response.data;
     } else {
       // post
-      var response = await dio.post(path, data: data);
+      var response = await dio.post(path, data: requestBody);
+      log("response code =${response.statusCode}");
       resp = response.data;
     }
-    //debugger(message: "response");
-    log("------Dio Response-----\n"
-        "${jsonEncode(resp)}");
+    log(" $url$path $method\n ${jsonEncode(requestBody)}\n ${jsonEncode(resp)}");
     return resp;
   }
 
   /// get
   static Future<Map<String, dynamic>> get(path, data) =>
-      request(path, data: data);
+      request(path, requestBody: data);
 
   /// post
   static Future<Map<String, dynamic>> post(path, data) =>
-      request(path, data: data, method: "post");
+      request(path, requestBody: data, method: "post");
 }

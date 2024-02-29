@@ -22,6 +22,8 @@ class MainScreen extends StatefulWidget {
 }
 
 class _DashboardScreen extends State<MainScreen> {
+  String inCount = "0";
+  String existCount = "0";
   List<LedParameters> leds = List.empty(growable: true);
 
   void getLedList() async {
@@ -78,15 +80,26 @@ class _DashboardScreen extends State<MainScreen> {
     widget.webSocketProvider = Provider.of<WebSocketProvider>(context);
     widget.webSocketProvider?.subscribe("home", (id, event, data) {
       log("message id=$id , event=$event, data=$data");
-      if (event == "LED") {
-        for (var led in leds) {
-          if (led.ip == id) {
-            setState(() {
-              log("刷新");
-              led.status = data;
-            });
+      switch (event) {
+        case "LED":
+          for (var led in leds) {
+            if (led.ip == id) {
+              setState(() {
+                led.status = data;
+              });
+            }
           }
-        }
+          break;
+        case "IN":
+          setState(() {
+            inCount = data;
+          });
+          break;
+        case "EXIST":
+          setState(() {
+            existCount = data;
+          });
+          break;
       }
     });
   }
@@ -122,11 +135,11 @@ class _DashboardScreen extends State<MainScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Text(
-                  "今日接待：${"500"}",
+                  "今日接待：${inCount}",
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Text(
-                  "当前在园：${"500"}",
+                  "当前在园：${existCount}",
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ],
