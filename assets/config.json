@@ -1,3 +1,4 @@
 {
-  "address":"http://localhost:6688"
+  "address": "http://localhost:6688",
+  "wsUrl": "ws://localhost:6688/ws/hao88"
 }

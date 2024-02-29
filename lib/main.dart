@@ -7,12 +7,12 @@ import 'package:ledshow_web/screens/main/min_page.dart';
 import 'package:provider/provider.dart';
 
 //测试编码 1a2d3
-void main() {
+void main() async {
   const myApp = const MyApp();
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => WebSocketProvider()),
-      ChangeNotifierProvider(create: (context) => ThemeProvider())
+      ChangeNotifierProvider(create: (context) => ThemeProvider()),
     ],
     child: myApp,
   ));

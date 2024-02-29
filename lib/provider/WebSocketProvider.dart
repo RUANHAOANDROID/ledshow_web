@@ -3,19 +3,31 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
+import 'package:ledshow_web/config.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import '../constants.dart';
 
 class WebSocketProvider extends ChangeNotifier {
   WebSocketChannel? _channel;
   final Map<String, Function> _subscribers = {};
   var isConnected = false;
+  var wsUrl = "";
 
   WebSocketProvider() {
-    _channel = WebSocketChannel.connect(Uri.parse(WS_URL));
+    initConnect();
+  }
+
+  void initConnect() async {
+    var config = await loadConfig();
+    wsUrl = config["wsUrl"];
+    _channel = WebSocketChannel.connect(Uri.parse(wsUrl));
     connect();
     isConnected = true;
     log("WebSocket connection $isConnected");
+  }
+
+  Future<String> getUrl() async {
+    var config = await loadConfig();
+    return config['address'];
   }
 
   void connect() {
@@ -31,7 +43,7 @@ class WebSocketProvider extends ChangeNotifier {
         var data = jsonMap['data'];
         _subscribers.forEach((key, callback) {
           //debugger(message: key);
-          callback(id,event, data);
+          callback(id, event, data);
           //debugPrint("$key -> $message");
         });
       },
@@ -51,7 +63,7 @@ class WebSocketProvider extends ChangeNotifier {
     log('WebSocket connection 5秒后重连');
     Future.delayed(const Duration(seconds: 5), () {
       log('WebSocket connection 正在重连');
-      _channel = WebSocketChannel.connect(Uri.parse(WS_URL));
+      _channel = WebSocketChannel.connect(Uri.parse(wsUrl));
       connect();
     });
   }
