@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
-import 'package:ledshow_web/config.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class WebSocketProvider extends ChangeNotifier {
@@ -12,23 +11,23 @@ class WebSocketProvider extends ChangeNotifier {
   var isConnected = false;
   var wsUrl = "";
 
-  WebSocketProvider() {
-    initConnect();
+  WebSocketProvider(){
+    log("Create WebSocketProvider");
   }
 
-  void initConnect() async {
-    var config = await loadConfig();
-    wsUrl = config["wsUrl"];
-    _channel = WebSocketChannel.connect(Uri.parse(wsUrl));
+  void initConnect(String address){
+    // var config = await loadConfig();
+    // wsUrl = config["wsUrl"];
+    _channel = WebSocketChannel.connect(Uri.parse("ws://$address:6688/ws/hao88"));
     connect();
     isConnected = true;
     log("WebSocket connection $isConnected");
   }
 
-  Future<String> getUrl() async {
-    var config = await loadConfig();
-    return config['address'];
-  }
+  // Future<String> getUrl() async {
+  //   var config = await loadConfig();
+  //   return config['address'];
+  // }
 
   void connect() {
     _channel?.stream.listen(

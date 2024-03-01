@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ledshow_web/localstorage/storage.dart';
 import 'package:ledshow_web/models/Resp.dart';
 import 'package:ledshow_web/net/http.dart';
+import 'package:ledshow_web/utils/StringUtils.dart';
 import 'package:ledshow_web/widget/mytoast.dart';
 
 import '../main/min_page.dart';
@@ -15,21 +16,29 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginScreen> {
+  String ip = "127.0.0.1";
   String authCode = "";
   String name = "";
   int limit = 0;
 
   @override
   Widget build(BuildContext context) {
+    var ipFormField = TextFormField(
+      onChanged: (value) {
+        ip = value!;
+      },
+      decoration: InputDecoration(
+          hoverColor: Theme.of(context).highlightColor,
+          //labelStyle: formTextStyle(context),
+          //hintStyle: formTextStyle(context),
+          border: const OutlineInputBorder(),
+          labelText: '限流节点网关IP地址',
+          hintText: '限流节点网关IP地址'),
+    );
+
     var textFormField = TextFormField(
       onChanged: (value) {
         authCode = value!;
-      },
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return '授权码为空';
-        }
-        return null;
       },
       decoration: InputDecoration(
           hoverColor: Theme.of(context).highlightColor,
@@ -56,11 +65,21 @@ class _LoginPageState extends State<LoginScreen> {
             ),
             Padding(
               padding: const EdgeInsets.only(
-                  left: 100.0, right: 100.0, top: 32.0, bottom: 64.0),
+                  left: 100.0, right: 100.0, top: 32.0, bottom: 16.0),
+              child: ipFormField,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 100.0, right: 100.0, top: 8.0, bottom: 64.0),
               child: textFormField,
             ),
             ElevatedButton(
                 onPressed: () async {
+                  if (!isValidIPAddress(ip)) {
+                    FToast().init(context).showToast(
+                        child: const MyToast(tip: "限流网关IP填写错误！", ok: false));
+                    return;
+                  }
                   if (authCode == "") {
                     FToast().init(context).showToast(
                         child: const MyToast(tip: "编号为空", ok: false));
@@ -73,13 +92,13 @@ class _LoginPageState extends State<LoginScreen> {
                             const MyToast(tip: "输入错误 编号由a~y,0~9组成", ok: false));
                     return;
                   }
-                  var ok = await auth();
+                  var ok = await auth(ip, authCode);
                   if (ok) {
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              MainScreen(authCode, name, "${limit}")),
+                              MainScreen(authCode, name, "$limit", ip)),
                       (route) => route == null,
                     );
                   }
@@ -94,15 +113,16 @@ class _LoginPageState extends State<LoginScreen> {
     );
   }
 
-  Future<bool> auth() async {
+  Future<bool> auth(String ip, String authCode) async {
     try {
+      HttpUtils.setAddress(ip);
       var resp = await HttpUtils.get("/auth/$authCode", "");
       log(resp.toString());
       int code = resp["code"] as int;
       if (code != null && code == SUCCESS) {
         name = resp["data"]["name"];
         limit = resp["data"]["limitsCount"];
-        await SaveAuth("$authCode|${name}|${limit}");
+        await SaveAuth("$authCode|$name|$limit|$ip");
         return true;
       } else {
         FToast()

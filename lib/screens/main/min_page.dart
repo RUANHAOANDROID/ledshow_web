@@ -2,20 +2,23 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ledshow_web/localstorage/storage.dart';
 import 'package:ledshow_web/models/LedParameters.dart';
 import 'package:ledshow_web/models/Resp.dart';
 import 'package:ledshow_web/net/http.dart';
 import 'package:ledshow_web/provider/WebSocketProvider.dart';
+import 'package:ledshow_web/screens/login/login_page.dart';
 import 'package:ledshow_web/widget/mytoast.dart';
 import 'package:provider/provider.dart';
 
 class MainScreen extends StatefulWidget {
   final String authCode;
+  final String ip;
   final String name;
-  final String limitsCount;
+  String limitsCount;
   WebSocketProvider? webSocketProvider;
 
-  MainScreen(this.authCode, this.name, this.limitsCount);
+  MainScreen(this.authCode, this.name, this.limitsCount, this.ip);
 
   @override
   State<StatefulWidget> createState() => _DashboardScreen();
@@ -77,7 +80,9 @@ class _DashboardScreen extends State<MainScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    HttpUtils.setAddress(widget.ip);
     widget.webSocketProvider = Provider.of<WebSocketProvider>(context);
+    widget.webSocketProvider?.initConnect(widget.ip);
     widget.webSocketProvider?.subscribe("home", (id, event, data) {
       log("message id=$id , event=$event, data=$data");
       switch (event) {
@@ -118,6 +123,96 @@ class _DashboardScreen extends State<MainScreen> {
   Widget build(BuildContext context) {
     log("build");
     // ApiManager.getStream("request");
+    Future<int?> _showMaxCountDialog() async {
+      TextEditingController _textController = TextEditingController();
+      return showDialog<int>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('输入限流值并确认'),
+            content: TextFormField(
+              controller: _textController,
+
+              keyboardType: TextInputType.number, // 设置输入类型为数字
+              decoration: InputDecoration(
+                  hoverColor: Theme.of(context).highlightColor,
+                  //labelStyle: formTextStyle(context),
+                  //hintStyle: formTextStyle(context),
+                  border: const OutlineInputBorder(),
+                  labelText: '最大限流人数',
+                  hintText: '最大限流人数'),
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  int? value = int.tryParse(_textController.text);
+                  if (value != null) {
+                    Navigator.of(context).pop(value); // 返回输入的整数值
+                  } else {
+                    // 如果输入不是有效的整数，则弹出提示
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('提示'),
+                          content: Text('错误的数值'),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text('确定'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+                child: Text('确定'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // 关闭对话框
+                },
+                child: Text('取消'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    Future<bool?> _showConfimDialog() async {
+      return showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('提示'),
+            content: Text('确认退出并切换节点?'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true); // 用户确认对话框，返回true
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                    (route) => route == null,
+                  );
+                },
+                child: Text('确定'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false); // 用户取消对话框，返回false
+                },
+                child: Text('取消'),
+              ),
+            ],
+          );
+        },
+      );
+    }
 
     List<Widget> widgets() {
       List<Widget> widgets = List.empty(growable: true);
@@ -130,9 +225,42 @@ class _DashboardScreen extends State<MainScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Text(
-                  "限流：${widget.limitsCount}",
-                  style: Theme.of(context).textTheme.titleMedium,
+                Text("限流节点：${widget.ip}",
+                    style: Theme.of(context).textTheme.titleMedium),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "限流：${widget.limitsCount}",
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    TextButton.icon(
+                        onPressed: () async {
+                          var maxCount = await _showMaxCountDialog();
+                          if (maxCount != null) {
+                            try {
+                              await HttpUtils.get(
+                                  "/updateMaxCount/${widget.authCode}/$maxCount",
+                                  "");
+                              await SaveAuth("${widget.authCode}|${widget.name}|$maxCount|${widget.ip}");
+                              setState(() {
+                                widget.limitsCount = "$maxCount";
+                              });
+                            } catch (e) {
+                              FToast().init(context).showToast(
+                                  child: MyToast(tip: "$e", ok: false));
+                            }
+                          }
+                        },
+                        icon: Icon(
+                          Icons.edit,
+                          color: Colors.blue,
+                        ),
+                        label: Text(
+                          "",
+                          style: TextStyle(color: Colors.blue),
+                        )),
+                  ],
                 ),
                 Text(
                   "今日接待：${inCount}",
@@ -141,6 +269,23 @@ class _DashboardScreen extends State<MainScreen> {
                 Text(
                   "当前在园：${existCount}",
                   style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton.icon(
+                        onPressed: () async {
+                          _showConfimDialog();
+                        },
+                        icon: Icon(
+                          Icons.logout,
+                          color: Colors.blue,
+                        ),
+                        label: Text(
+                          "切换节点",
+                          style: TextStyle(color: Colors.blue),
+                        )),
+                  ],
                 ),
               ],
             ),

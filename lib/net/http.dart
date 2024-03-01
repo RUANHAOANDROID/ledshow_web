@@ -31,6 +31,10 @@ class HttpUtils {
     return dio!;
   }
 
+  static void setAddress(String ip) {
+    url = "http://$ip:6688";
+  }
+
   /// 请求api
   static Future<Map<String, dynamic>> request(String path,
       {requestBody, method}) async {
@@ -44,18 +48,21 @@ class HttpUtils {
     var dio = getInstance();
     var resp;
     if (method == "get") {
-      log(url+path);
+      log("request get: $url $path");
       // get
       var response = await dio.get(path);
-      log("response code =${response.statusCode}");
+      log("response:code=${response.statusCode}");
       resp = response.data;
+      log("response:body=${resp}");
     } else {
       // post
+      log("request post: $url $path");
+      log("request body:$requestBody");
       var response = await dio.post(path, data: requestBody);
-      log("response code =${response.statusCode}");
+      log("response:code=${response.statusCode}");
       resp = response.data;
+      log("response:body=${resp}");
     }
-    log(" $url$path $method\n ${jsonEncode(requestBody)}\n ${jsonEncode(resp)}");
     return resp;
   }
 

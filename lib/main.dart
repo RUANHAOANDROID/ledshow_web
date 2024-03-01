@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
             var data = auth.data;
             if (null != data) {
               var split = data.split("|");
-              return MainScreen(split[0], split[1], split[2]);
+              return MainScreen(split[0], split[1], split[2],split[3]);
             } else {
               return LoginScreen();
             }
