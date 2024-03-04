@@ -52,7 +52,7 @@ class _DashboardScreen extends State<MainScreen> {
         });
       }
     } catch (e) {
-      log("$e");
+      log("获取LED失败$e");
       FToast()
           .init(context)
           .showToast(child: MyToast(tip: "获取LED失败$e", ok: false));
@@ -74,13 +74,13 @@ class _DashboardScreen extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+    HttpUtils.setAddress(widget.ip);
     getLedList();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    HttpUtils.setAddress(widget.ip);
     widget.webSocketProvider = Provider.of<WebSocketProvider>(context);
     widget.webSocketProvider?.initConnect(widget.ip);
     widget.webSocketProvider?.subscribe("home", (id, event, data) {

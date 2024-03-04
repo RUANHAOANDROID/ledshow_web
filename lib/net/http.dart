@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:ledshow_web/config.dart';
 import '../constants.dart';
 
 class HttpUtils {
@@ -40,11 +38,11 @@ class HttpUtils {
       {requestBody, method}) async {
     requestBody = requestBody ?? {};
     method = method ?? "get";
-    if (url == null) {
-      var config = await loadConfig();
-      url = config['address'];
-      log(url);
-    }
+    // if (url == null) {
+    //   var config = await loadConfig();
+    //   url = config['address'];
+    //   log(url);
+    // }
     var dio = getInstance();
     var resp;
     if (method == "get") {
