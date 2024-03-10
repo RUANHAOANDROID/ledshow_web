@@ -20,7 +20,7 @@ class Tip extends StatelessWidget {
       height: myHeight,
       alignment: Alignment.center,
       child: Text(
-        '$tip',
+        tip,
         style: TextStyle(color: color),
       ),
     );

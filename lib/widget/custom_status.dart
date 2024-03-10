@@ -7,7 +7,7 @@ class CustomStatus extends StatefulWidget {
   final Color color;
   final String status;
 
-  CustomStatus({Key? key, required this.color, required this.status})
+  const CustomStatus({Key? key, required this.color, required this.status})
       : super(key: key);
 
   @override
@@ -27,7 +27,7 @@ class _CustomStatus extends State<CustomStatus> {
     var _netStatus = Row(
       children: [
         Padding(
-          padding: EdgeInsets.only(right: defaultPadding/4),
+          padding: const EdgeInsets.only(right: defaultPadding/4),
           child: drawCircle,
         ),
         Text(widget.status)

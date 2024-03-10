@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 
 //测试编码 1a2d3
 void main() async {
-  const myApp = const MyApp();
+  const myApp = MyApp();
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => WebSocketProvider()),

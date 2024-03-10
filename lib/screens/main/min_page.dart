@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ledshow_web/localstorage/storage.dart';
@@ -18,7 +17,7 @@ class MainScreen extends StatefulWidget {
   String limitsCount;
   WebSocketProvider? webSocketProvider;
 
-  MainScreen(this.authCode, this.name, this.limitsCount, this.ip);
+  MainScreen(this.authCode, this.name, this.limitsCount, this.ip, {super.key});
 
   @override
   State<StatefulWidget> createState() => _DashboardScreen();
@@ -129,7 +128,7 @@ class _DashboardScreen extends State<MainScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('输入限流值并确认'),
+            title: const Text('输入限流值并确认'),
             content: TextFormField(
               controller: _textController,
 
@@ -154,14 +153,14 @@ class _DashboardScreen extends State<MainScreen> {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text('提示'),
-                          content: Text('错误的数值'),
+                          title: const Text('提示'),
+                          content: const Text('错误的数值'),
                           actions: <Widget>[
                             TextButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
-                              child: Text('确定'),
+                              child: const Text('确定'),
                             ),
                           ],
                         );
@@ -169,13 +168,13 @@ class _DashboardScreen extends State<MainScreen> {
                     );
                   }
                 },
-                child: Text('确定'),
+                child: const Text('确定'),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(); // 关闭对话框
                 },
-                child: Text('取消'),
+                child: const Text('取消'),
               ),
             ],
           );
@@ -183,16 +182,17 @@ class _DashboardScreen extends State<MainScreen> {
       );
     }
 
-    Future<bool?> _showConfimDialog() async {
+    Future<bool?> showConfimDialog() async {
       return showDialog<bool>(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('提示'),
-            content: Text('确认退出并切换节点?'),
+            title: const Text('提示'),
+            content: const Text('确认退出并切换节点?'),
             actions: <Widget>[
               TextButton(
-                onPressed: () {
+                onPressed: () async {
+                  await RemoveAuth();
                   Navigator.of(context).pop(true); // 用户确认对话框，返回true
                   Navigator.pushAndRemoveUntil(
                     context,
@@ -200,13 +200,13 @@ class _DashboardScreen extends State<MainScreen> {
                     (route) => route == null,
                   );
                 },
-                child: Text('确定'),
+                child: const Text('确定'),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(false); // 用户取消对话框，返回false
                 },
-                child: Text('取消'),
+                child: const Text('取消'),
               ),
             ],
           );
@@ -219,9 +219,9 @@ class _DashboardScreen extends State<MainScreen> {
       var infoCard = Card(
         elevation: 10,
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Container(
-            constraints: BoxConstraints(minWidth: double.infinity),
+            constraints: const BoxConstraints(minWidth: double.infinity),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -242,7 +242,8 @@ class _DashboardScreen extends State<MainScreen> {
                               await HttpUtils.get(
                                   "/updateMaxCount/${widget.authCode}/$maxCount",
                                   "");
-                              await SaveAuth("${widget.authCode}|${widget.name}|$maxCount|${widget.ip}");
+                              await SaveAuth(
+                                  "${widget.authCode}|${widget.name}|$maxCount|${widget.ip}");
                               setState(() {
                                 widget.limitsCount = "$maxCount";
                               });
@@ -252,11 +253,11 @@ class _DashboardScreen extends State<MainScreen> {
                             }
                           }
                         },
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.edit,
                           color: Colors.blue,
                         ),
-                        label: Text(
+                        label: const Text(
                           "",
                           style: TextStyle(color: Colors.blue),
                         )),
@@ -275,13 +276,13 @@ class _DashboardScreen extends State<MainScreen> {
                   children: [
                     TextButton.icon(
                         onPressed: () async {
-                          _showConfimDialog();
+                          showConfimDialog();
                         },
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.logout,
                           color: Colors.blue,
                         ),
-                        label: Text(
+                        label: const Text(
                           "切换节点",
                           style: TextStyle(color: Colors.blue),
                         )),
@@ -303,18 +304,14 @@ class _DashboardScreen extends State<MainScreen> {
         "LED",
         style: Theme.of(context).textTheme.titleLarge,
       ));
-      Column createLedCard() {
-        return Column();
-      }
-
       if (leds.isNotEmpty) {
         for (var led in leds) {
           widgets.add(Card(
             elevation: 10,
             child: Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Container(
-                constraints: BoxConstraints(minWidth: double.infinity),
+                constraints: const BoxConstraints(minWidth: double.infinity),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -333,11 +330,11 @@ class _DashboardScreen extends State<MainScreen> {
                             onPressed: () {
                               reconnect(led.ip);
                             },
-                            icon: Icon(
+                            icon: const Icon(
                               Icons.refresh,
                               color: Colors.blue,
                             ),
-                            label: Text(
+                            label: const Text(
                               "重连",
                               style: TextStyle(color: Colors.blue),
                             )),
@@ -351,7 +348,7 @@ class _DashboardScreen extends State<MainScreen> {
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         Text(
-                          "${led.status}",
+                          led.status,
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -374,7 +371,7 @@ class _DashboardScreen extends State<MainScreen> {
         body: SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: widgets(),
         ),
