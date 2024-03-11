@@ -35,10 +35,11 @@ class MyApp extends StatelessWidget {
             var data = auth.data;
             if (null != data) {
               var split = data.split("|");
-              return MainScreen(split[0], split[1], split[2],split[3]);
-            } else {
-              return LoginScreen();
+              if (split.length > 4) {
+                return MainScreen(split[0], split[1], split[2], split[3]);
+              }
             }
+            return LoginScreen();
           } else {
             return const Scaffold(
               body: Center(

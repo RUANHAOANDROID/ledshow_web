@@ -26,6 +26,7 @@ class MainScreen extends StatefulWidget {
 class _DashboardScreen extends State<MainScreen> {
   String inCount = "0";
   String existCount = "0";
+  String maxCount = "0";
   List<LedParameters> leds = List.empty(growable: true);
 
   void getLedList() async {
@@ -85,6 +86,11 @@ class _DashboardScreen extends State<MainScreen> {
     widget.webSocketProvider?.subscribe("home", (id, event, data) {
       log("message id=$id , event=$event, data=$data");
       switch (event) {
+        case "LIMIT":
+          setState(() {
+            maxCount =data;
+          });
+          break;
         case "LED":
           for (var led in leds) {
             if (led.ip == id) {
