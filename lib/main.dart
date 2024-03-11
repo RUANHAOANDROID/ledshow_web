@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:ledshow_web/localstorage/storage.dart';
 import 'package:ledshow_web/provider/ThemeProvider.dart';
@@ -33,9 +35,12 @@ class MyApp extends StatelessWidget {
         builder: (context, auth) {
           if (auth.connectionState == ConnectionState.done) {
             var data = auth.data;
+            print(data);
             if (null != data) {
               var split = data.split("|");
-              if (split.length > 4) {
+              print(split.length);
+              print(split);
+              if (split.length >= 4) {
                 return MainScreen(split[0], split[1], split[2], split[3]);
               }
             }
