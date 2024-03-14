@@ -8,8 +8,8 @@ steps:
       - name: build_web
         path: /drone/src/build/web
     commands:
-      - sleep 1000
       - flutter build web --web-renderer html
+      - sleep 1000
   - name: upload
     image: minio/mc:RELEASE.2024-01-16T16-06-34Z
     environment:
