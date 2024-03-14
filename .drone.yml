@@ -8,6 +8,7 @@ steps:
       - name: build_web
         path: /drone/src/build/web
     commands:
+      - flutter pub outdated
       - flutter build web --web-renderer html
       - sleep 1000
   - name: upload
