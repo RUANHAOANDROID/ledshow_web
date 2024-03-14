@@ -4,7 +4,7 @@ name: default
 steps:
   - name: build
 #    image: mobiledevops/flutter-sdk-image
-    image: plugfox/flutter:master-web
+    image: instrumentisto/flutter
     volumes:
       - name: build_web
         path: /drone/src/build/web
