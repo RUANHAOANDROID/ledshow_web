@@ -29,6 +29,16 @@ class _DashboardScreen extends State<MainScreen> {
   String maxCount = "0";
   List<LedParameters> leds = List.empty(growable: true);
 
+  Future auth(String ip, String authCode) async {
+    try {
+      HttpUtils.setAddress(ip);
+      var resp = await HttpUtils.get("/auth/$authCode", "");
+      log(resp.toString());
+    } catch (e) {
+      log("error----$e");
+      return false;
+    }
+  }
   void getLedList() async {
     try {
       var resp = await HttpUtils.get("/leds/${widget.authCode}", "");
@@ -75,6 +85,7 @@ class _DashboardScreen extends State<MainScreen> {
   void initState() {
     super.initState();
     HttpUtils.setAddress(widget.ip);
+    auth(widget.ip, widget.authCode);
     getLedList();
   }
 
@@ -237,7 +248,7 @@ class _DashboardScreen extends State<MainScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "限流：${widget.limitsCount}",
+                      "限流：${maxCount}",
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     TextButton.icon(
@@ -250,8 +261,9 @@ class _DashboardScreen extends State<MainScreen> {
                                   "");
                               await SaveAuth(
                                   "${widget.authCode}|${widget.name}|$maxCount|${widget.ip}");
+                              widget.limitsCount = "$maxCount";
                               setState(() {
-                                widget.limitsCount = "$maxCount";
+                                log("limit count ${maxCount}");
                               });
                             } catch (e) {
                               FToast().init(context).showToast(
