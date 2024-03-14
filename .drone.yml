@@ -10,10 +10,9 @@ steps:
         path: /drone/src/build/web
     commands:
       - ls
-      - sleep 1000
-      - chmod +x pubspec.lock
+      - flutter upgrade
       - flutter build web --web-renderer html
-      - sleep 1000
+      - tar -czvf target_web.tar.gz build/web
   - name: upload
     image: minio/mc:RELEASE.2024-01-16T16-06-34Z
     environment:
@@ -25,9 +24,7 @@ steps:
         from_secret: MINIO_SECRET_KEY
     commands:
       - mc config host add mio $ADDRESS $ACCESS_KEY $SECRET_KEY
-      - mc cp CHANGES.md mio/uchi
-      - mc cp app/build/outputs/apk/landscape/release/*.apk mio/uchi/apk/portrait
-      - mc cp app/build/outputs/apk/portrait/release/*.apk mio/uchi/apk/landscape
+      - mc cp target_web.tar.gz mio/uchi
 volumes:
   - name: build_web
     host:
