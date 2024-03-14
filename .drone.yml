@@ -3,7 +3,8 @@ type: docker
 name: default
 steps:
   - name: build
-    image: mobiledevops/flutter-sdk-image
+#    image: mobiledevops/flutter-sdk-image
+    image: fischerscode/flutter
     volumes:
       - name: build_web
         path: /drone/src/build/web
