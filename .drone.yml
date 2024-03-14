@@ -10,7 +10,7 @@ steps:
         path: /drone/src/build/web
     commands:
       - ls
-      - flutter upgrade
+      - flutter upgrade --force
       - flutter build web --web-renderer html
       - tar -czvf target_web.tar.gz build/web
   - name: upload
