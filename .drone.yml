@@ -9,8 +9,7 @@ steps:
       - name: build_web
         path: /drone/src/build/web
     commands:
-      - flutter pub outdated
-      - sleep 1000
+      - sleep 100
       - chmod +x pubspec.lock
       - flutter build web --web-renderer html
       - sleep 1000
