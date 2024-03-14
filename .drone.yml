@@ -9,6 +9,7 @@ steps:
         path: /drone/src/build/web
     commands:
       - flutter pub outdated
+      - chmod +x pubspec.lock
       - flutter build web --web-renderer html
       - sleep 1000
   - name: upload
