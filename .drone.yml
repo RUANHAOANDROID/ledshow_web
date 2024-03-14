@@ -24,7 +24,7 @@ steps:
         from_secret: MINIO_SECRET_KEY
     commands:
       - mc config host add mio $ADDRESS $ACCESS_KEY $SECRET_KEY
-      - mc cp target_web.tar.gz mio/uchi
+      - mc cp target_web.tar.gz mio/uchi/ledshow_web
 volumes:
   - name: build_web
     host:
