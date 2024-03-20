@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ledshow_web/config.dart';
 import 'package:ledshow_web/localstorage/storage.dart';
 import 'package:ledshow_web/models/Resp.dart';
 import 'package:ledshow_web/net/http.dart';
@@ -19,6 +20,13 @@ class _LoginPageState extends State<LoginScreen> {
   String authCode = "";
   String name = "";
   int limit = 0;
+  String version = "";
+
+  @override
+  void initState() {
+    super.initState();
+    getConfig();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,9 +60,9 @@ class _LoginPageState extends State<LoginScreen> {
       child: Container(
         constraints: const BoxConstraints(
             minWidth: 500.0,
-            minHeight: 500.0,
+            minHeight: 400.0,
             maxWidth: 600.0,
-            maxHeight: 600.0),
+            maxHeight: 500.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -69,7 +77,7 @@ class _LoginPageState extends State<LoginScreen> {
             ),
             Padding(
               padding: const EdgeInsets.only(
-                  left: 100.0, right: 100.0, top: 8.0, bottom: 64.0),
+                  left: 100.0, right: 100.0, top: 8.0, bottom: 32.0),
               child: textFormField,
             ),
             ElevatedButton(
@@ -102,14 +110,36 @@ class _LoginPageState extends State<LoginScreen> {
                     );
                   }
                 },
-                child: const Text("进入"))
+                child: const Text("进入")),
           ],
         ),
       ),
     );
     return Scaffold(
-      body: Center(child: card),
+      body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          card,
+          Padding(
+            padding:
+                const EdgeInsets.only(left: 100.0, right: 100.0, top: 64.0),
+            child: Text("Version-$version"),
+          ),
+          const Padding(
+            padding:
+            EdgeInsets.only(left: 100.0, right: 100.0, top: 0.0),
+            child: Text("Copyright © UChi. All Rights Reserved."),
+          ),
+        ],
+      )),
     );
+  }
+
+  void getConfig() async {
+    var config = await loadConfig();
+    version = config["version"];
+    setState(() {});
   }
 
   Future<bool> auth(String ip, String authCode) async {

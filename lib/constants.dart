@@ -1,4 +1,5 @@
 const BASE_URL = "http://open.hao88.cloud:6688";
+const LIMIT_URL ="http://limit.api.yyxcloud.com";
 const WS_URL = 'ws://open.hao88.cloud:6688/ws/hao88';
 const CONNECT_TIMEOUT = Duration(seconds: 10000);
 const RECEIVE_TIMEOUT = Duration(seconds: 10000);

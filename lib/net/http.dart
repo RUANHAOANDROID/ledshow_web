@@ -46,7 +46,7 @@ class HttpUtils {
     var dio = getInstance();
     var resp;
     if (method == "get") {
-      log("request get: $url $path");
+      log("request get: $url$path");
       // get
       var response = await dio.get(path);
       log("response:code=${response.statusCode}");

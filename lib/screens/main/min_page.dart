@@ -1,6 +1,8 @@
 import 'dart:developer';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ledshow_web/constants.dart';
 import 'package:ledshow_web/localstorage/storage.dart';
 import 'package:ledshow_web/models/LedParameters.dart';
 import 'package:ledshow_web/models/Resp.dart';
@@ -27,6 +29,7 @@ class _DashboardScreen extends State<MainScreen> {
   String inCount = "0";
   String existCount = "0";
   String maxCount = "0";
+  String version ="1.0.0";
   List<LedParameters> leds = List.empty(growable: true);
 
   Future auth(String ip, String authCode) async {
@@ -39,6 +42,7 @@ class _DashboardScreen extends State<MainScreen> {
       return false;
     }
   }
+
   void getLedList() async {
     try {
       var resp = await HttpUtils.get("/leds/${widget.authCode}", "");
@@ -99,7 +103,7 @@ class _DashboardScreen extends State<MainScreen> {
       switch (event) {
         case "LIMIT":
           setState(() {
-            maxCount =data;
+            maxCount = data;
           });
           break;
         case "LED":
@@ -121,6 +125,11 @@ class _DashboardScreen extends State<MainScreen> {
             existCount = data;
           });
           break;
+        case "VERSION":
+          setState(() {
+            version = data;
+          });
+          break;
       }
     });
   }
@@ -137,6 +146,7 @@ class _DashboardScreen extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    String outCount = '10';
     log("build");
     // ApiManager.getStream("request");
     Future<int?> _showMaxCountDialog() async {
@@ -293,6 +303,27 @@ class _DashboardScreen extends State<MainScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     TextButton.icon(
+                      onPressed: () async {
+                        await passGate10();
+                        FToast().init(context).showToast(
+                            child: const MyToast(
+                                tip: "出口放行10人,请观察当前在园", ok: true));
+                      },
+                      icon: const Icon(
+                        Icons.outbond,
+                        color: Colors.blue,
+                      ),
+                      label: const Text(
+                        "手动放行10人",
+                        style: TextStyle(color: Colors.blue),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton.icon(
                         onPressed: () async {
                           showConfimDialog();
                         },
@@ -306,6 +337,7 @@ class _DashboardScreen extends State<MainScreen> {
                         )),
                   ],
                 ),
+                Text("v${version.replaceAll('"', '')}")
               ],
             ),
           ),
@@ -395,5 +427,13 @@ class _DashboardScreen extends State<MainScreen> {
         ),
       ),
     ));
+  }
+
+  Future<void> passGate10() async {
+    try {
+      await HttpUtils.get("/upOut/${widget.authCode}", "");
+    }catch(e){
+      log("error:$e");
+    }
   }
 }
