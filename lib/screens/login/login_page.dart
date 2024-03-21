@@ -21,6 +21,7 @@ class _LoginPageState extends State<LoginScreen> {
   String name = "";
   int limit = 0;
   String version = "";
+  var enableVAdd = false;
 
   @override
   void initState() {
@@ -105,7 +106,7 @@ class _LoginPageState extends State<LoginScreen> {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              MainScreen(authCode, name, "$limit", ip)),
+                              MainScreen(authCode, name, "$limit", ip,enableVAdd)),
                       (route) => route == null,
                     );
                   }
@@ -151,7 +152,8 @@ class _LoginPageState extends State<LoginScreen> {
       if (code != null && code == SUCCESS) {
         name = resp["data"]["name"];
         limit = resp["data"]["limitsCount"];
-        await SaveAuth("$authCode|$name|$limit|$ip");
+        enableVAdd =resp["data"]["enableVAdd"];
+        await SaveAuth("$authCode|$name|$limit|$ip|$enableVAdd");
         return true;
       } else {
         FToast()

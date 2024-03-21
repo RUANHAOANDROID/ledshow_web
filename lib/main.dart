@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:ledshow_web/localstorage/storage.dart';
 import 'package:ledshow_web/provider/ThemeProvider.dart';
@@ -40,8 +38,13 @@ class MyApp extends StatelessWidget {
               var split = data.split("|");
               print(split.length);
               print(split);
-              if (split.length >= 4) {
-                return MainScreen(split[0], split[1], split[2], split[3]);
+              if (split.length >= 5) {
+                var authCode = split[0];
+                var name = split[1];
+                var limit = split[2];
+                var ip = split[3];
+                var enableVAdd = split[4].toLowerCase() == 'true';
+                return MainScreen(authCode, name, limit, ip,enableVAdd);
               }
             }
             return LoginScreen();

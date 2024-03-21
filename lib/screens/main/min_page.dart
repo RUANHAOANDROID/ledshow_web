@@ -1,8 +1,6 @@
 import 'dart:developer';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:ledshow_web/constants.dart';
 import 'package:ledshow_web/localstorage/storage.dart';
 import 'package:ledshow_web/models/LedParameters.dart';
 import 'package:ledshow_web/models/Resp.dart';
@@ -16,10 +14,14 @@ class MainScreen extends StatefulWidget {
   final String authCode;
   final String ip;
   final String name;
+  final bool enableVAdd;
+
   String limitsCount;
   WebSocketProvider? webSocketProvider;
 
-  MainScreen(this.authCode, this.name, this.limitsCount, this.ip, {super.key});
+  MainScreen(
+      this.authCode, this.name, this.limitsCount, this.ip, this.enableVAdd,
+      {super.key});
 
   @override
   State<StatefulWidget> createState() => _DashboardScreen();
@@ -29,7 +31,7 @@ class _DashboardScreen extends State<MainScreen> {
   String inCount = "0";
   String existCount = "0";
   String maxCount = "0";
-  String version ="1.0.0";
+  String version = "1.0.0";
   List<LedParameters> leds = List.empty(growable: true);
 
   Future auth(String ip, String authCode) async {
@@ -304,7 +306,7 @@ class _DashboardScreen extends State<MainScreen> {
                   children: [
                     TextButton.icon(
                       onPressed: () async {
-                        await passGate10();
+                        await upOut10();
                         FToast().init(context).showToast(
                             child: const MyToast(
                                 tip: "出口放行10人,请观察当前在园", ok: true));
@@ -314,12 +316,34 @@ class _DashboardScreen extends State<MainScreen> {
                         color: Colors.blue,
                       ),
                       label: const Text(
-                        "手动放行10人",
+                        "手动放行 10人",
                         style: TextStyle(color: Colors.blue),
                       ),
                     ),
                   ],
                 ),
+                if (widget.enableVAdd)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () async {
+                          await upIn1();
+                          FToast().init(context).showToast(
+                              child: const MyToast(
+                                  tip: "手动入园1人次,请观察当前在园", ok: true));
+                        },
+                        icon: const Icon(
+                          Icons.emoji_people,
+                          color: Colors.blue,
+                        ),
+                        label: const Text(
+                          "手动入园   1人",
+                          style: TextStyle(color: Colors.blue),
+                        ),
+                      ),
+                    ],
+                  ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -429,10 +453,18 @@ class _DashboardScreen extends State<MainScreen> {
     ));
   }
 
-  Future<void> passGate10() async {
+  Future<void> upOut10() async {
     try {
       await HttpUtils.get("/upOut/${widget.authCode}", "");
-    }catch(e){
+    } catch (e) {
+      log("error:$e");
+    }
+  }
+
+  Future<void> upIn1() async {
+    try {
+      await HttpUtils.get("/upIn/${widget.authCode}", "");
+    } catch (e) {
       log("error:$e");
     }
   }
